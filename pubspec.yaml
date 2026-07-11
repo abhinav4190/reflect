@@ -1,5 +1,5 @@
 name: reflect
-description: "A new Flutter project."
+description: "reflect is a system for conscious living that helps align a user's daily qualitative inputs with their long-term personal frameworks. The application provides a structured data layer to analyze the relationship between daily actions and overarching life objectives, creating a clearer feedback loop for personal development."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -35,6 +35,10 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^3.3.2
+  supabase_flutter: ^2.16.0
+  flutter_dotenv: ^6.0.1
+  flutter_svg: ^2.3.0
+  google_fonts: ^8.1.0
 
 dev_dependencies:
   flutter_test:
@@ -61,7 +65,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - .env
-  #   - images/a_dot_ham.jpeg
+    - assets/icons/
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
