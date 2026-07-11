@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:reflect/screens/auth_screen.dart';
-import 'package:reflect/screens/splash_screen.dart';
 import 'package:reflect/screens/splash_screen_v2.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:reflect/screens/auth_screen.dart';
+import 'package:reflect/screens/onboarding_screen.dart';
 import 'package:reflect/theme/app_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -61,9 +64,16 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _decideNextRoute() async {
-    await Future.delayed(const Duration(milliseconds: 2500));
+    await Future.delayed(const Duration(milliseconds: 3100));
 
-    // will do actual login here shortly..
+    if(!mounted) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final onbaordingSeen = prefs.getBool('onboarding_seen') ?? false;
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_)=> onbaordingSeen ? const AuthScreen() : const OnboardingScreen())
+    );
   }
 
   @override

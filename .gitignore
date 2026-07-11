@@ -47,3 +47,5 @@ app.*.map.json
 *.p8
 
 node_modules/
+
+.env
