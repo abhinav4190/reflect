@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:reflect/main.dart';
-import 'package:reflect/screens/home_screen.dart';
+import 'package:reflect/screens/home_shell.dart';
 import 'package:reflect/theme/app_theme.dart';
 
 enum _SetupStep {
@@ -110,7 +110,7 @@ class _SetupScreenState extends State<SetupScreen> {
     if (!mounted) return;
     Navigator.of(
       context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeShell()));
   }
 
   @override

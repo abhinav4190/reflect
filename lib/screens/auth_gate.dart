@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:reflect/main.dart';
 import 'package:reflect/screens/auth_screen.dart';
-import 'package:reflect/screens/home_screen.dart';
+import 'package:reflect/screens/home_shell.dart';
 import 'package:reflect/screens/setup_screen.dart';
 import 'package:reflect/services/supabase_service.dart';
 import 'package:reflect/theme/app_theme.dart';
@@ -58,7 +58,7 @@ class _AuthGateState extends State<AuthGate> {
 
             final completed = setupSnapshot.data ?? false;
 
-            return completed ? const HomeScreen() : const SetupScreen();
+            return completed ? const HomeShell() : const SetupScreen();
           },
         );
       },
