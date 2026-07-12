@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:reflect/screens/auth_screen.dart';
 import 'package:reflect/screens/onboarding_screen.dart';
+import 'package:reflect/screens/setup_screen.dart';
 import 'package:reflect/theme/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

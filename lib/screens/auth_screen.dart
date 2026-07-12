@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:reflect/screens/setup_screen.dart';
 import 'package:reflect/theme/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -50,6 +51,10 @@ class _AuthScreenState extends State<AuthScreen> {
         await client.auth.signInWithPassword(
           password: _password.text.trim(),
           email: _email.text.trim(),
+        );
+        if(!mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => SetupScreen())
         );
       }
     } catch (e) {
