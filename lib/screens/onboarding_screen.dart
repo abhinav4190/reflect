@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:reflect/screens/auth_gate.dart';
 import 'package:reflect/screens/auth_screen.dart';
 import 'package:reflect/theme/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -43,7 +44,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (!mounted) return;
     Navigator.of(
       context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const AuthScreen()));
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const AuthGate()));
   }
 
   @override

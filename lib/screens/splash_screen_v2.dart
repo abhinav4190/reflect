@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:reflect/screens/auth_gate.dart';
 import 'package:reflect/screens/auth_screen.dart';
 import 'package:reflect/screens/onboarding_screen.dart';
 import 'package:reflect/screens/setup_screen.dart';
@@ -73,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen>
     final onbaordingSeen = prefs.getBool('onboarding_seen') ?? false;
 
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_)=> onbaordingSeen ? const AuthScreen() : const OnboardingScreen())
+      MaterialPageRoute(builder: (_)=> onbaordingSeen ? const AuthGate() : const OnboardingScreen())
     );
   }
 

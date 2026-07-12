@@ -110,7 +110,7 @@ class _SetupScreenState extends State<SetupScreen> {
     if (!mounted) return;
     Navigator.of(
       context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeShell()));
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
   }
 
   @override
@@ -433,7 +433,7 @@ class _WakingHoursStep extends StatelessWidget {
                 child: _TimeTile(
                   label: 'Until',
                   time: end,
-                  onTap: () => _pick(context, end, onStartChanged),
+                  onTap: () => _pick(context, end, onEndChanged),
                 ),
               ),
             ],

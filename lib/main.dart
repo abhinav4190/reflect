@@ -20,7 +20,9 @@ class ReflectApp extends StatelessWidget{
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Reflect',
-      home: SplashScreen()
+      onGenerateRoute:(settings) {
+        return MaterialPageRoute(builder: (_) => const SplashScreen());
+      },
     );
     
   }

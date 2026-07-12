@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:reflect/screens/setup_screen.dart';
 import 'package:reflect/theme/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -12,31 +12,46 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
+enum _LoadingAction { none, apple, google, email }
+
 class _AuthScreenState extends State<AuthScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
-  bool _loading = false;
+  _LoadingAction _loadingAction = _LoadingAction.none;
   String? _error;
   bool _showEmailForm = false;
   bool _isSignUpMode = true;
 
-  Future<void> _withOAuth(OAuthProvider provider) async {
+  bool get _loading => _loadingAction != _LoadingAction.none;
+
+  Future<void> _withOAuth(OAuthProvider provider, _LoadingAction action) async {
     setState(() {
-      _loading = true;
+      _loadingAction = action;
       _error = null;
     });
     try {
-      await Supabase.instance.client.auth.signInWithOAuth(provider);
+      final authResponse = await Supabase.instance.client.auth
+          .getOAuthSignInUrl(
+            provider: provider,
+            redirectTo: 'io.supabase.reflect://login-callback',
+          );
+
+      final result = await FlutterWebAuth2.authenticate(
+        url: authResponse.url,
+        callbackUrlScheme: 'io.supabase.reflect',
+      );
+
+      await Supabase.instance.client.auth.getSessionFromUrl(Uri.parse(result));
     } catch (e) {
-      setState(() => _error = 'Something went wrong. Try again. $e');
+      setState(() => _error = 'Something went wrong. Please try again. $e');
     } finally {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loadingAction = _LoadingAction.none);
     }
   }
 
   Future<void> _emailAuth({required bool isSignUp}) async {
     setState(() {
-      _loading = true;
+      _loadingAction = _LoadingAction.email;
       _error = null;
     });
 
@@ -52,15 +67,11 @@ class _AuthScreenState extends State<AuthScreen> {
           password: _password.text.trim(),
           email: _email.text.trim(),
         );
-        if(!mounted) return;
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => SetupScreen())
-        );
       }
     } catch (e) {
-      setState(() => _error = 'Check your creds and try again. $e');
+      setState(() => _error = 'Check your email and password and try again.');
     } finally {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loadingAction = _LoadingAction.none);
     }
   }
 
@@ -70,7 +81,7 @@ class _AuthScreenState extends State<AuthScreen> {
       backgroundColor: AppColors.paper,
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsetsGeometry.symmetric(horizontal: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -83,7 +94,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   height: 1,
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Text(
                 'A quiet place to notice\nhow you spend your time.',
                 style: GoogleFonts.poppins(
@@ -97,38 +108,26 @@ class _AuthScreenState extends State<AuthScreen> {
                 _AuthOptionButton(
                   label: 'Continue with Apple',
                   iconAsset: 'assets/icons/apple_logo.svg',
+                  loading: _loadingAction == _LoadingAction.apple,
                   onTap: _loading
                       ? null
-                      : () => _withOAuth(OAuthProvider.apple),
+                      : () => _withOAuth(
+                          OAuthProvider.apple,
+                          _LoadingAction.apple,
+                        ),
                 ),
                 const SizedBox(height: 12),
                 _AuthOptionButton(
                   label: 'Continue with Google',
                   iconAsset: 'assets/icons/google_logo.svg',
+                  loading: _loadingAction == _LoadingAction.google,
                   onTap: _loading
                       ? null
-                      : () => _withOAuth(OAuthProvider.google),
+                      : () => _withOAuth(
+                          OAuthProvider.google,
+                          _LoadingAction.google,
+                        ),
                 ),
-
-                // const SizedBox(height: 24),
-                // Center(
-                //   child: TextButton(
-                //     onPressed: _loading
-                //         ? null
-                //         : () => setState(() => _showEmailForm = true),
-                //     style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                //     child: Text(
-                //       'Continue with email',
-                //       style: GoogleFonts.poppins(
-                //         fontSize: 13,
-                //         fontWeight: FontWeight.w500,
-                //         color: AppColors.ink,
-                //         decoration: TextDecoration.underline,
-                //         decorationColor: AppColors.ink,
-                //       ),
-                //     ),
-                //   ),
-                // ),
                 const SizedBox(height: 12),
                 _AuthOptionButton(
                   label: 'Continue with Email',
@@ -164,10 +163,9 @@ class _AuthScreenState extends State<AuthScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: _AuthOptionButton(
-                    label: _loading
-                        ? 'Please wait'
-                        : (_isSignUpMode ? 'Continue' : 'Sign in'),
+                    label: _isSignUpMode ? 'Continue' : 'Sign in',
                     filled: true,
+                    loading: _loadingAction == _LoadingAction.email,
                     onTap: _loading
                         ? null
                         : () => _emailAuth(isSignUp: _isSignUpMode),
@@ -182,7 +180,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     child: Text(
                       _isSignUpMode
                           ? 'Already have an account? Sign in'
-                          : "Don't have an account? Sign uo",
+                          : "Don't have an account? Sign up",
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         color: AppColors.muted,
@@ -191,7 +189,6 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                 ),
               ],
-
               if (_error != null) ...[
                 const SizedBox(height: 12),
                 Text(
@@ -202,7 +199,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                 ),
               ],
-              // const Spacer(flex: 1),
+              const Spacer(flex: 1),
             ],
           ),
         ),
@@ -215,43 +212,57 @@ class _AuthOptionButton extends StatelessWidget {
   final String label;
   final String? iconAsset;
   final bool filled;
+  final bool loading;
   final VoidCallback? onTap;
 
   const _AuthOptionButton({
-    super.key,
     required this.label,
     this.iconAsset,
     this.filled = false,
+    this.loading = false,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: filled ? AppColors.ink : AppColors.fill,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
+    return Opacity(
+      opacity: onTap == null && !loading ? 0.5 : 1.0,
+      child: Material(
+        color: filled ? AppColors.ink : AppColors.fill,
         borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: Container(
-          height: 52,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (iconAsset != null) ...[
-                SvgPicture.asset(iconAsset!, width: 18, height: 18),
-                const SizedBox(width: 10),
-              ],
-              Text(
-                label,
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: filled ? AppColors.paper : AppColors.ink,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Container(
+            height: 52,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (loading) ...[
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: filled ? AppColors.paper : AppColors.ink,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                ] else if (iconAsset != null) ...[
+                  SvgPicture.asset(iconAsset!, width: 18, height: 18),
+                  const SizedBox(width: 10),
+                ],
+                Text(
+                  loading ? 'Please wait' : label,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: filled ? AppColors.paper : AppColors.ink,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -264,7 +275,6 @@ class _CustomTextField extends StatelessWidget {
   final String hint;
   final bool obscure;
   const _CustomTextField({
-    super.key,
     required this.controller,
     required this.hint,
     this.obscure = false,
