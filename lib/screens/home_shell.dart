@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:reflect/main.dart';
+import 'package:reflect/screens/home_tab.dart';
 import 'package:reflect/screens/profile_screen.dart';
 import 'package:reflect/theme/app_theme.dart';
 
@@ -15,12 +16,21 @@ class _HomeScreenState extends State<HomeShell> {
   int _index = 0;
   final _titles = const ['Home', 'Reflections', 'Life Hub', 'Insights'];
 
-  final _tabs = const [
-    _Tabs(title: 'Home'),
-    _Tabs(title: 'Reflections'),
-    _Tabs(title: 'Life Hub'),
-    _Tabs(title: 'Insights'),
-  ];
+  // final _tabs = const [
+  //   _Tabs(title: 'Home'),
+  //   _Tabs(title: 'Reflections'),
+  //   _Tabs(title: 'Life Hub'),
+  //   _Tabs(title: 'Insights'),
+  // ];
+
+  List<Widget> _buildTabs() {
+    return [
+      HomeTab(onNavigate: (i) => setState(() => _index = i)),
+      _Tabs(title: 'Reflections'),
+      _Tabs(title: 'Life Hub'),
+      _Tabs(title: 'Insights'),
+    ];
+  }
 
   void _openProfile() {
     Navigator.of(
@@ -48,7 +58,7 @@ class _HomeScreenState extends State<HomeShell> {
         ],
       ),
 
-      body: IndexedStack(index: _index, children: _tabs),
+      body: IndexedStack(index: _index, children: _buildTabs()),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(color: AppColors.paper),
         child: SafeArea(
@@ -73,7 +83,7 @@ class _HomeScreenState extends State<HomeShell> {
                   isActive: _index == 1,
                   onTap: () => setState(() => _index = 1),
                 ),
-                 _NavItem(
+                _NavItem(
                   icon: const _NavIcon.material(Icons.hub_outlined),
                   activeIcon: const _NavIcon.material(Icons.hub),
                   isActive: _index == 2,
@@ -106,7 +116,8 @@ class _NavItem extends StatelessWidget {
     required this.icon,
     required this.activeIcon,
     required this.isActive,
-    required this.onTap,this.iconSize = 24,
+    required this.onTap,
+    this.iconSize = 24,
   });
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:reflect/main.dart';
+import 'package:reflect/services/supabase_service.dart';
 import 'package:reflect/theme/app_theme.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -28,7 +29,7 @@ class ProfileScreen extends StatelessWidget {
       ),
       body: Padding(padding: EdgeInsets.all(24), child: Align(
         alignment: Alignment.bottomLeft,
-        child: TextButton(onPressed: ()=> supabase.auth.signOut(), child: Text('Sign out', style: GoogleFonts.poppins(fontSize: 13, color: AppColors.muted),)),
+        child: TextButton(onPressed: ()=> SupabaseService().signOut(), child: Text('Sign out', style: GoogleFonts.poppins(fontSize: 13, color: AppColors.muted),)),
       ),),
     );
   }
