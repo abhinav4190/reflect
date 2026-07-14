@@ -68,5 +68,14 @@ class SupabaseService {
     return (rows as List).map((r) => ReflectionModel.fromJson(r)).toList();
   }
 
+  Future<List<ReflectionModel>> getAllRefelctions() async {
+    final rows = await _client
+        .from('reflections')
+        .select()
+        .eq('user_id', _userId)
+        .order('recorded_at', ascending: false);
+    return (rows as List).map((r) => ReflectionModel.fromJson(r)).toList();
+  }
+
   Future<void> signOut() => _client.auth.signOut();
 }

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:reflect/main.dart';
 import 'package:reflect/screens/home_tab.dart';
 import 'package:reflect/screens/profile_screen.dart';
+import 'package:reflect/screens/reflections_tab.dart';
 import 'package:reflect/theme/app_theme.dart';
 
 class HomeShell extends StatefulWidget {
@@ -26,7 +27,7 @@ class _HomeScreenState extends State<HomeShell> {
   List<Widget> _buildTabs() {
     return [
       HomeTab(onNavigate: (i) => setState(() => _index = i)),
-      _Tabs(title: 'Reflections'),
+      ReflectionsTab(),
       _Tabs(title: 'Life Hub'),
       _Tabs(title: 'Insights'),
     ];
