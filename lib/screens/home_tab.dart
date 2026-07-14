@@ -38,10 +38,14 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   Future<void> _refresh() async {
-    final data = await _load();
-    if (!mounted) return;
-    setState(() => _future = Future.value(data));
-  }
+  final data = await _load();
+
+  if (!mounted) return;
+
+  setState(() {
+    _future = Future.value(data);
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -65,10 +69,10 @@ class _HomeTabState extends State<HomeTab> {
             padding: EdgeInsets.fromLTRB(24, 0, 24, 32),
             children: [
               _StatusBanner(data: data),
-              const SizedBox(height: 24,),
+              const SizedBox(height: 15),
               _MetricGrid(data: data, onNavigate: widget.onNavigate),
-              const SizedBox(height: 28,),
-              _TimelinePreview(data: data, onNavigate: widget.onNavigate)
+              const SizedBox(height: 28),
+              _TimelinePreview(data: data, onNavigate: widget.onNavigate),
             ],
           ),
         );
@@ -218,8 +222,42 @@ class _MetricGrid extends StatelessWidget {
         ? 0.0
         : (data.reflections.length / data.reflectionTarget).clamp(0.0, 1.0);
 
-    return Column(children: [
-        
+    return Column(
+      children: [
+        _HeroCard(
+          count: data.reflections.length,
+          target: data.reflectionTarget,
+          progress: progress,
+          onTap: () => onNavigate(1),
+        ),
+        SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _MetricCard(
+                labell: 'Time focused',
+                value: _formatMinutes(data.totalMinutesFocused),
+                onTap: () => onNavigate(3),
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: _MetricCard(
+                labell: 'Money logged',
+                value: _formatMoney(data.totalSpent),
+                onTap: () => onNavigate(3),
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: _MetricCard(
+                labell: 'Hydration',
+                value: _formatWater(data.totalWaterMl),
+                onTap: () => onNavigate(2),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -244,49 +282,52 @@ class _HeroCard extends StatelessWidget {
     return _PressableCard(
       color: AppColors.ink,
       onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Reflections today',
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: AppColors.paper.withOpacity(0.6),
-            ),
-          ),
-          SizedBox(height: 6),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                '$count',
-                style: GoogleFonts.instrumentSerif(
-                  fontSize: 40,
-                  color: AppColors.paper,
-                  height: 1,
-                ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Reflections today',
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                color: AppColors.paper.withOpacity(0.6),
               ),
-              Text(
-                ' / target',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  color: AppColors.paper.withOpacity(0.5),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 4,
-              backgroundColor: AppColors.paper.withOpacity(0.15),
-              valueColor: AlwaysStoppedAnimation(AppColors.paper),
             ),
-          ),
-        ],
+            SizedBox(height: 6),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  '$count',
+                  style: GoogleFonts.instrumentSerif(
+                    fontSize: 40,
+                    color: AppColors.paper,
+                    height: 1,
+                  ),
+                ),
+                Text(
+                  ' / $target', 
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    color: AppColors.paper.withOpacity(0.5),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 4,
+                backgroundColor: AppColors.paper.withOpacity(0.15),
+                valueColor: AlwaysStoppedAnimation(AppColors.paper),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -358,7 +399,7 @@ class __PressableCardState extends State<_PressableCard> {
       onTapDown: (_) => setState(() => _scale = 0.97),
       onTapUp: (_) => setState(() => _scale = 1.0),
       onTapCancel: () => setState(() => _scale = 1.0),
-      onTap: () => setState(() => _scale = 1.0),
+     onTap: widget.onTap,
       child: AnimatedScale(
         scale: _scale,
         duration: const Duration(milliseconds: 100),
@@ -464,38 +505,63 @@ class _TimelinePreview extends StatelessWidget {
   }
 }
 
-class _HomeLoading extends StatefulWidget {
+class _HomeLoading extends StatelessWidget {
   const _HomeLoading({super.key});
 
-  @override
-  State<_HomeLoading> createState() => __HomeLoadingState();
-}
-
-class __HomeLoadingState extends State<_HomeLoading> {
-  late final Stream<int> _dots;
-
-  @override
-  void initState() {
-    super.initState();
-    _dots = Stream.periodic(
-      const Duration(milliseconds: 450),
-      (i) => (i % 3) + 1,
+  Widget _box({
+    double? width,
+    required double height,
+    double radius = 16,
+  }) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: AppColors.fill,
+        borderRadius: BorderRadius.circular(radius),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: _dots,
-      builder: (context, snap) {
-        final dots = snap.data ?? 1;
-        return Center(
-          child: Text(
-            'Loading${'.' * dots}',
-            style: GoogleFonts.poppins(fontSize: 13, color: AppColors.muted),
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+      children: [
+        _box(width: 220, height: 34, radius: 8),
+        const SizedBox(height: 10),
+        _box(width: 180, height: 14, radius: 6),
+
+        const SizedBox(height: 22),
+
+        _box(height: 150),
+
+        const SizedBox(height: 12),
+
+        Row(
+          children: [
+            Expanded(child: _box(height: 90)),
+            const SizedBox(width: 12),
+            Expanded(child: _box(height: 90)),
+            const SizedBox(width: 12),
+            Expanded(child: _box(height: 90)),
+          ],
+        ),
+
+        const SizedBox(height: 28),
+
+        _box(width: 170, height: 24, radius: 8),
+
+        const SizedBox(height: 16),
+
+        ...List.generate(
+          3,
+          (_) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _box(height: 70),
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 }
